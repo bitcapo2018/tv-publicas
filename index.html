@@ -84,7 +84,7 @@
 
     // Función para cargar los canales desde /channels.json
     function loadChannels() {
-      fetch('/channels.json')
+      fetch('https://raw.githubusercontent.com/bitcapo2018/tv-publicas/refs/heads/main/channels.json')
         .then(response => {
           if (!response.ok) {
             throw new Error('Error al cargar channels.json');
