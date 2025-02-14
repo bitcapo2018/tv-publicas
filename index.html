@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TV Públicas con Video.js</title>
+  <!-- Incluimos el CSS de Video.js -->
+  <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
+
+  <style>
+    /* Estilos generales */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    /* Video responsive */
+    #tvPlayer {
+      width: 100%;
+      height: auto;
+    }
+    /* Lista de canales */
+    #channelsList {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .channel-item {
+      flex: 1 1 calc(33.33% - 10px);
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.3s;
+    }
+    .channel-item:hover {
+      background-color: #eaeaea;
+    }
+    /* Adaptabilidad en dispositivos medianos y pequeños */
+    @media (max-width: 768px) {
+      .channel-item {
+        flex: 1 1 calc(50% - 10px);
+      }
+    }
+    @media (max-width: 480px) {
+      .channel-item {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>TV Públicas</h1>
+    <!-- Reproductor Video.js -->
+    <video id="tvPlayer" class="video-js vjs-default-skin vjs-fluid" controls preload="auto" data-setup='{}'>
+      <source src="" type="application/x-mpegURL">
+      Tu navegador no soporta el elemento de video.
+    </video>
+
+    <!-- Contenedor donde se cargarán los canales -->
+    <div id="channelsList">
+      <!-- Los canales se agregarán aquí dinámicamente -->
+    </div>
+  </div>
+
+  <!-- Incluimos la librería Video.js -->
+  <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
+  <script>
+    // Inicializamos el reproductor Video.js
+    var player = videojs('tvPlayer');
+
+    // Función para cargar los canales desde /channels.json
+    function loadChannels() {
+      fetch('/channels.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Error al cargar channels.json');
+          }
+          return response.json();
+        })
+        .then(channels => {
+          var channelsList = document.getElementById('channelsList');
+          channels.forEach(channel => {
+            var channelDiv = document.createElement('div');
+            channelDiv.className = 'channel-item';
+            channelDiv.textContent = channel.name;
+            channelDiv.addEventListener('click', function() {
+              // Actualizamos la fuente del reproductor y reproducimos el canal seleccionado
+              player.src({
+                src: channel.url,
+                type: channel.type || 'application/x-mpegURL' // Por defecto se asume HLS
+              });
+              player.play();
+            });
+            channelsList.appendChild(channelDiv);
+          });
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          document.getElementById('channelsList').textContent = 'No se pudieron cargar los canales.';
+        });
+    }
+
+    // Cargamos los canales cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', loadChannels);
+  </script>
+</body>
+</html>
